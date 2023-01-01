@@ -1,4 +1,0 @@
-crontab -e
-
-*/5 * * * * /home/e/Scripts/ip-finder/ipcheck.sh
-@reboot /home/e/Scripts/ip-finder/ipcheck.sh startup
