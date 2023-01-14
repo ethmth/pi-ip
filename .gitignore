@@ -1,4 +1,6 @@
 .env
+.ip_local.temp
+.ip_state.temp
 ip_temp.txt
 ip.temp
 ip.state

@@ -16,21 +16,20 @@ function check_online
 	fi
 }
 
+# SEND IFTTT REQUEST
 function ifttt_request
 {
-	echo "IP is $IP_ADDRESS"
-    #curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"ip-info\": \"${IP_ADDRESS}\"}" https://maker.ifttt.com/trigger/${EVENT_NAME}/json/with/key/${IFTTT_KEY}
+    curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"local-ip\": \"${LOCAL_IP}\"}" https://maker.ifttt.com/trigger/${EVENT_NAME}/json/with/key/${IFTTT_KEY}
+    # echo "Running curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"local-ip\": \"${LOCAL_IP}\"}" https://maker.ifttt.com/trigger/${EVENT_NAME}/json/with/key/${IFTTT_KEY}"
 }
 
+# CHECK FOR ONLINE STATUS
 IS_ONLINE=$(check_online)
-echo "IS ONLINE IS $IS_ONLINE"
-
 MAX_CHECKS=20
 CHECKS=0
 
 while [ "$IS_ONLINE" = "0" ]; do
 	
-	echo "SLEEPING 10"    
 	sleep 10;
     IS_ONLINE=$(check_online)
 
@@ -44,42 +43,28 @@ if [ "$IS_ONLINE" = "0" ]; then
     exit 1
 fi
 
-echo "INTERNET ON"
-
 # GET THE LOCAL IP
-
 source "${ABSOLUTE_PATH}/.env"
-
-IP_ADDRESS=$(ip a | grep ${INTERFACE_NAME} | grep inet)
-
-echo ${IP_ADDRESS} > ${ABSOLUTE_PATH}/ip_temp.txt
-
-IP_ADDRESS=$(cat ${ABSOLUTE_PATH}/ip_temp.txt)
-
-echo "IN BODY IP: $IP_ADDRESS"
+LOCAL_INET=$(ip a | grep ${INTERFACE_NAME} | grep inet | xargs)
+LOCAL_INET=($LOCAL_INET)
+LOCAL_IP=${LOCAL_INET[1]}
 
 # SEND THE LOCAL IP TO IFTTT ON startup ARG
-
 if [[ "$1" == "startup" ]]; then
-    #curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"ip-info\": \"${IP_ADDRESS}\"}" https://maker.ifttt.com/trigger/${EVENT_NAME}/json/with/key/${IFTTT_KEY}
 	ifttt_request
-
-    echo ${IP_ADDRESS} > ${ABSOLUTE_PATH}/ip_state.txt
-
+    echo ${LOCAL_IP} > ${ABSOLUTE_PATH}/.ip_local.temp
     exit 0
 fi
 
 # COMPARE THE NEW IP TO THE OLD IP ON NON-STARTUP FLAG
+OLD_LOCAL_IP=$(cat ${ABSOLUTE_PATH}/.ip_local.temp)
 
-OLD_IP_ADDRESS=$(cat ${ABSOLUTE_PATH}/ip_state.txt)
-
-if [[ "$OLD_IP_ADDRESS" == "$IP_ADDRESS" ]]; then
+if [[ "$OLD_LOCAL_IP" == "$LOCAL_IP" ]]; then
     echo "ip hasn't changed"
 else
-    #curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"ip-info\": \"${IP_ADDRESS}\"}" https://maker.ifttt.com/trigger/${EVENT_NAME}/json/with/key/${IFTTT_KEY}
 	ifttt_request
 fi
 
-echo ${IP_ADDRESS} > ${ABSOLUTE_PATH}/ip_state.txt
+echo ${LOCAL_IP} > ${ABSOLUTE_PATH}/.ip_local.temp
 
 exit 0
