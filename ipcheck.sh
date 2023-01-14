@@ -8,12 +8,11 @@ ABSOLUTE_PATH=$(pwd)
 # CHECK IF THERE IS INTERNET CONNECTION
 function check_online
 {
-    ON_NOW=$(netcat -z -w 5 1.1.1.1 53 && echo 1 || echo 0)
-	if [ $ON_NOW -eq 1 ]; then
-		echo $ON_NOW
+    ON_NOW=$(netcat -z -w 5 1.1.1.1 53 && echo "1" || echo "0")
+	if [ "$ON_NOW" = "1" ]; then
+		echo "$ON_NOW"
 	else
-		echo "PING TEST"
-		ping -c 1 -W 3 archlinux.org && echo 1 || echo 0
+		ping -q -c 1 -W 3 archlinux.org &> /dev/null && echo "1" || echo "0"
 	fi
 }
 
@@ -23,17 +22,16 @@ function ifttt_request
     #curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"ip-info\": \"${IP_ADDRESS}\"}" https://maker.ifttt.com/trigger/${EVENT_NAME}/json/with/key/${IFTTT_KEY}
 }
 
-#check_online
-#exit 0
-
 IS_ONLINE=$(check_online)
+echo "IS ONLINE IS $IS_ONLINE"
 
 MAX_CHECKS=20
 CHECKS=0
 
-while [ $IS_ONLINE -eq 0 ]; do
-	echo "SLEEPING 10"
-    sleep 10;
+while [ "$IS_ONLINE" = "0" ]; do
+	
+	echo "SLEEPING 10"    
+	sleep 10;
     IS_ONLINE=$(check_online)
 
     CHECKS=$[ $CHECKS + 1 ]
@@ -42,7 +40,7 @@ while [ $IS_ONLINE -eq 0 ]; do
     fi
 done
 
-if [ $IS_ONLINE -eq 0 ]; then
+if [ "$IS_ONLINE" = "0" ]; then
     exit 1
 fi
 
