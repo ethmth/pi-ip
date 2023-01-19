@@ -45,7 +45,7 @@ For the _If This_ service, select "Webhooks" then "Receive a web request with a 
 Add the event name to the `.env` file.
 
 ```
-EVENT_NAME=<your_event_name>
+IFTTT_EVENT=<your_event_name>
 ```
 
 For the _Then That_ service, you could theoretically select anything, but I selected "Send an email."
@@ -55,6 +55,8 @@ Once the Applet is created, go to [ifttt.com/maker_webhooks](https://ifttt.com/m
 ```
 IFTTT_KEY=<your_key>
 ```
+
+You can put whatever you'd like for the `IFTTT_MESSAGE`.
 
 ## Running the Script
 
