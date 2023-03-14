@@ -21,6 +21,7 @@ function ifttt_request
 {
 	echo "Running curl -o /dev/null -X POST -H \"Content-Type: application/json\" -d \"{\"message\": \"${IFTTT_MESSAGE}\",\"local-ip\": \"${LOCAL_IP}\"}\" https://maker.ifttt.com/trigger/${IFTTT_EVENT}/json/with/key/${IFTTT_KEY}"
 	curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"message\": \"${IFTTT_MESSAGE}\",\"local-ip\": \"${LOCAL_IP}\"}" https://maker.ifttt.com/trigger/${IFTTT_EVENT}/json/with/key/${IFTTT_KEY}
+	curl -o /dev/null -X POST -H "Content-Type: application/json" -d "{\"id\": \"$(cat /etc/hostname)\",\"local\": \"${LOCAL_IP}\",\"ip\": \"none\", \"port\": \"none\"}" $REST_DNS_URL/ip
 }
 
 # CHECK FOR ONLINE STATUS
@@ -46,6 +47,7 @@ source "${ABSOLUTE_PATH}/.env"
 LOCAL_INET=$(ip a | grep ${INTERFACE_NAME} | grep inet | xargs)
 LOCAL_INET=($LOCAL_INET)
 LOCAL_IP=${LOCAL_INET[1]}
+LOCAL_IP=${LOCAL_IP%/*}
 
 # SEND THE LOCAL IP TO IFTTT ON startup ARG
 if [[ "$1" == "startup" ]]; then
